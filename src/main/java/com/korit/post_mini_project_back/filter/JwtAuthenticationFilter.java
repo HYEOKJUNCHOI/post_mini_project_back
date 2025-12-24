@@ -36,8 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        String accessToken = bearerToken.replaceAll("Bearer ", "");
 
+        String accessToken = bearerToken.replaceAll("Bearer ", "");
         if (!jwtTokenProvider.validateToken(accessToken)) {
             filterChain.doFilter(request, response);
             return;
@@ -56,8 +56,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(principalUser, password, authorities);
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        System.out.println(authentication);
         filterChain.doFilter(request, response);
     }
 

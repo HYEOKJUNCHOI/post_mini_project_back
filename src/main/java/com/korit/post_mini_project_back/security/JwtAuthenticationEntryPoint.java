@@ -20,4 +20,5 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증 실패");
         }
     }
+
 }

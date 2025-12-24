@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
@@ -22,15 +22,16 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         System.out.println(authentication);
+//        DefaultOAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
+//        oAuth2User.getAttributes().get("id");
         User foundUser = userService.findUserByOauth2Id(authentication.getName());
-
-        // 데이터베이스에서 User 정보 조회
 
         if (foundUser == null) {
             // 회원가입
-          foundUser = userService.createUser(authentication);
+            foundUser = userService.createUser(authentication);
         }
         String accessToken = jwtTokenProvider.createAccessToken(foundUser);
         response.sendRedirect("http://localhost:5173/auth/login/oauth2?accessToken=" + accessToken);
     }
+
 }

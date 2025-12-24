@@ -1,6 +1,5 @@
 package com.korit.post_mini_project_back.config;
 
-
 import com.korit.post_mini_project_back.filter.JwtAuthenticationFilter;
 import com.korit.post_mini_project_back.security.JwtAuthenticationEntryPoint;
 import com.korit.post_mini_project_back.security.OAuth2SuccessHandler;
@@ -20,9 +19,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+@Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@Configuration
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -30,38 +29,42 @@ public class SecurityConfig {
     private final OAuth2UserService oAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // CORS 적용 / 아래것 적용
+        // CORS 적용
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
-        //세션 비활성화(무상태)
+        // 세션 비활성화(무상태)
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         // http 기본 로그인 비활성화
         http.httpBasic(httpBasic -> httpBasic.disable());
-        // form 로그인 비활성화 [다른폼 off]
+        // form 로그인 비활성화
         http.formLogin(formLogin -> formLogin.disable());
-        // csrf 비활성화 [워터마크 같은것]
-        http.csrf(csrf->csrf.disable());
+        // csrf 비활성화
+        http.csrf(csrf -> csrf.disable());
 
         http.oauth2Login(oauth2 ->
                 oauth2.userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
-        );
+                        .failureHandler((req, resp, exception) -> {
 
+                        })
+        );
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         http.authorizeHttpRequests(auth -> {
-            auth.requestMatchers("/api/auth/**").permitAll(); // / 와 /a 둘 다 허용
+            auth.requestMatchers("/api/auth/**").permitAll();
             auth.requestMatchers("/v3/api-docs/**").permitAll();
             auth.requestMatchers("/swagger-ui/**").permitAll();
-            auth.requestMatchers("swagger-ui.html").permitAll();
+            auth.requestMatchers("/swagger-ui.html").permitAll();
             auth.requestMatchers("/doc").permitAll();
+            auth.requestMatchers("/oauth2/**").permitAll();
+            auth.requestMatchers("/login/**").permitAll();
+            auth.requestMatchers("/image/**").permitAll();
             auth.anyRequest().authenticated();
         });
 
-        http.exceptionHandling(exception ->exception.authenticationEntryPoint(jwtAuthenticationEntryPoint));
+        http.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint));
 
         return http.build();
     }
@@ -73,10 +76,10 @@ public class SecurityConfig {
 //        cors.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         cors.setAllowedMethods(List.of("*"));
         cors.setAllowedHeaders(List.of("*"));
-        cors.setAllowCredentials(true); // 쿠키허용
+        cors.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", cors); // 위의 셋팅을 모든 url에 하겟다는 뜻
+        source.registerCorsConfiguration("/**", cors);
         return source;
     }
 
